@@ -19,3 +19,8 @@ func addCtxLogFields(ctx context.Context) {
 	)
 }
 ```
+
+# Install
+```bash
+go get https://github.com/emieli/go-ctxlog
+```
