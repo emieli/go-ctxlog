@@ -13,6 +13,10 @@ import (
 	"sync"
 )
 
+type ctxKey string
+
+var Key = ctxKey("ctxlog")
+
 type Fields struct {
 	mtx    sync.Mutex
 	fields []slog.Attr
@@ -24,12 +28,9 @@ func (f *Fields) AddField(attr ...slog.Attr) {
 	f.fields = append(f.fields, attr...)
 }
 
+// Implements log.LogValuer interface
 func (f *Fields) LogValue() slog.Value {
 	f.mtx.Lock()
 	defer f.mtx.Unlock()
 	return slog.GroupValue(f.fields...)
 }
-
-type ctxKey string
-
-var Key = ctxKey("ctxlog")
