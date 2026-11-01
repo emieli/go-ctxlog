@@ -34,3 +34,29 @@ func (f *Fields) LogValue() slog.Value {
 	defer f.mtx.Unlock()
 	return slog.GroupValue(f.fields...)
 }
+
+// NewGroup creates a new Group that allows further nesting/grouping of slog attrs.
+// This is useful if you for example want all logs from each function to have
+// its own group in the final log. Create a new group and put all your logs in the group.
+// Don't forget to add the logs to the 'clog' parent via the AppendTo funcion.
+func (f Fields) NewGroup(name string) Group {
+	return Group{name: name}
+}
+
+// Group allows further nesting/grouping of slog attrs.
+// This is useful if you for example want all logs from each function to have
+// its own group in the final log.
+type Group struct {
+	name  string
+	attrs []slog.Attr
+}
+
+func (g *Group) AddField(attr ...slog.Attr) {
+	g.attrs = append(g.attrs, attr...)
+}
+
+// AppendTo appends all logs collected by the group to the 'clog' parent.
+// You can defer this function call, ensuring we have received all logs before sending to parent.
+func (g *Group) AppendTo(clog *Fields) {
+	clog.AddField(slog.GroupAttrs(g.name, g.attrs...))
+}
